@@ -53,24 +53,25 @@ def add_user():
         user = User(str(id), email, str(password))
         check_user = UserModel.get_user_email(email)
 
-        if email != check_user['email']:
+        if check_user != None:
+            return jsonify({'message': "User already exists"}), 400
+        else:
             affected_rows = UserModel.add_user(user)
 
             if affected_rows == 1:
                 return jsonify(user.id)
             else:
                 return jsonify({'message': "Error on insert"}), 500
-        else:
-            return jsonify({'message': "User already exists"}), 400
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
+
 
 @main.route('/delete/<id>', methods=['DELETE'])
 def delete_user(id):
     try:
-        user=User(id)
+        user = User(id)
 
-        affected_rows=UserModel.delete_user(user)
+        affected_rows = UserModel.delete_user(user)
 
         if affected_rows == 1:
             return jsonify(user.id)
@@ -78,6 +79,7 @@ def delete_user(id):
             return jsonify({'message': "No user deleted"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
+
 
 @main.route('/update/<id>', methods=['PUT'])
 @expects_json(SCHEMA)
@@ -96,14 +98,15 @@ def update_user(id):
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
 
+
 @main.route('/login')
 @expects_json(SCHEMA)
 def login_users():
     try:
         email = request.json['email']
-        password=request.json['password']
+        password = request.json['password']
 
-        user_check=UserModel.get_user_email(email)
+        user_check = UserModel.get_user_email(email)
         if user_check and check_password_hash(user_check['password'], password):
             return jsonify({'login': "success"})
         else:

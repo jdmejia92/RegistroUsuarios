@@ -1,6 +1,10 @@
 from src.database.db import get_connection
 from .entities.User import User
 
+def create_table(con):
+    sql = "CREATE TABLE IF NOT EXISTS users (id CHAR(36), email VARCHAR(50), password VARCHAR(150))"
+    with con.cursor() as cur:
+        cur.execute(sql)
 
 class UserModel():
 
@@ -8,6 +12,7 @@ class UserModel():
     def get_users(self):
         try:
             connection = get_connection()
+            create_table(connection)
             users = []
 
             with connection.cursor() as cur:
