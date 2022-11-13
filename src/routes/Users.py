@@ -97,19 +97,3 @@ def update_user(id):
             return jsonify({'message': "No user updated"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500
-
-
-@main.route('/login')
-@expects_json(SCHEMA)
-def login_users():
-    try:
-        email = request.json['email']
-        password = request.json['password']
-
-        user_check = UserModel.get_user_email(email)
-        if user_check and check_password_hash(user_check['password'], password):
-            return jsonify({'login': "success"})
-        else:
-            return jsonify({'login': "User or password incorrect"}), 404
-    except Exception as ex:
-        return jsonify({'message': str(ex)}), 500

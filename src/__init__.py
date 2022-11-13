@@ -5,7 +5,6 @@ from flask_cors import CORS
 from .routes import Users
 
 app = Flask(__name__, instance_relative_config=True)
-app.config.from_object("config")
 
 CORS(app,resources={"*":{"origins":"localhost:5000"}}) # Modificar el puerto a seleccion
 

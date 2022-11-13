@@ -8,16 +8,11 @@ Se ira agregando funciones de manejo de usuarios con Flask Login en el futuro.
 ---
 
 1. Clonar el repositorio con Git Clone
-2. Cambiar de nombre los archivos config_template y .env_template, y cambiar los valores de las variable de entorno
-
-```powershell
-cp config_template.py config.py
-```
-
+2. Cambiar de nombre los valores de las variable de entorno
 ```powershell
 cp .env_template .env
 ```
-3. Crear un ambiente virtual
+1. Crear un ambiente virtual
 ```powershell
 python -m venv venv
 ```

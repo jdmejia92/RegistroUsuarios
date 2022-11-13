@@ -1,1 +1,0 @@
-SECRET_KEY=<Aqui tu SECRET KEY>
