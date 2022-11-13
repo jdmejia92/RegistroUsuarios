@@ -2,9 +2,14 @@ from src.database.db import get_connection
 from .entities.User import User
 
 def create_table(con):
-    sql = "CREATE TABLE IF NOT EXISTS users (id CHAR(36), email VARCHAR(50), password VARCHAR(150))"
+    sql = """CREATE TABLE IF NOT EXISTS users (id character(36) NOT NULL,
+    email varchar(255) UNIQUE DEFAULT NULL, 
+    password varchar(255) DEFAULT NULL, 
+    PRIMARY KEY (id))"""
     with con.cursor() as cur:
         cur.execute(sql)
+    con.commit()
+    cur.close()
 
 class UserModel():
 
@@ -12,7 +17,6 @@ class UserModel():
     def get_users(self):
         try:
             connection = get_connection()
-            create_table(connection)
             users = []
 
             with connection.cursor() as cur:
@@ -108,6 +112,22 @@ class UserModel():
             with connection.cursor() as cur:
                 cur.execute("UPDATE users SET email = %s, password = %s WHERE id = %s",
                             (user.email, user.password, user.id))
+                affected_rows = cur.rowcount
+                connection.commit()
+
+            connection.close()
+            return affected_rows
+        except Exception as ex:
+            raise ex
+
+    @classmethod
+    def update_password(self, user):
+        try:
+            connection = get_connection()
+
+            with connection.cursor() as cur:
+                cur.execute("UPDATE users SET password = %s WHERE id = %s",
+                            (user.password, user.id))
                 affected_rows = cur.rowcount
                 connection.commit()
 

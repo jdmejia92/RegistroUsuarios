@@ -18,3 +18,11 @@ def page_not_found(error):
 
 # Manejo de errores
 app.register_error_handler(404, page_not_found)
+
+from .database.db import get_connection
+from .models.UserModel import create_table
+
+con = get_connection()
+create_table(con)
+
+

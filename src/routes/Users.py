@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_expects_json import expects_json
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
+import psycopg2
 
 # Entities
 from src.models.entities.User import User
@@ -11,14 +12,24 @@ from src.models.UserModel import UserModel
 
 main = Blueprint('user_blueprint', __name__)
 
+# Cambiar el tipo de dominio de correo que desees autentificar en pattern
 SCHEMA = {
     "type": "object",
 
     "properties": {
-        "email": {"type": "string", "pattern": "^\\S+@\\S+\\.\\S+$", "format": "email"},
+        "email": {"type": "string", "pattern": "^\\S+@system.\\S+$", "format": "email"},
         "password": {"type": "string", "minLength": 6, "maxLength": 10}
     },
     "required": ["email", "password"]
+}
+
+SCHEMA_PASSWORD = {
+    "type": "object",
+
+    "properties": {
+        "password": {"type": "string", "minLength": 6, "maxLength": 10}
+    },
+    "required": ["password"]
 }
 
 
@@ -51,18 +62,16 @@ def add_user():
         password = generate_password_hash(request.json["password"])
         id = uuid.uuid4()
         user = User(str(id), email, str(password))
-        check_user = UserModel.get_user_email(email)
 
-        if check_user != None:
-            return jsonify({'message': "User already exists"}), 400
+        affected_rows = UserModel.add_user(user)
+
+        if affected_rows == 1:
+            return jsonify(user.id)
         else:
-            affected_rows = UserModel.add_user(user)
-
-            if affected_rows == 1:
-                return jsonify(user.id)
-            else:
-                return jsonify({'message': "Error on insert"}), 500
+            return jsonify({'message': "Error on insert"}), 500
     except Exception as ex:
+        if type(ex) == psycopg2.errors.UniqueViolation:
+            return jsonify({'message': 'The user already exist'}), 400
         return jsonify({'message': str(ex)}), 500
 
 
@@ -86,7 +95,8 @@ def delete_user(id):
 def update_user(id):
     try:
         email = request.json["email"]
-        password = generate_password_hash(request.json["password"])
+        password = request.json["password"]
+
         user = User(id, email, str(password))
 
         affected_rows = UserModel.update_user(user)
@@ -95,5 +105,30 @@ def update_user(id):
             return jsonify(user.id)
         else:
             return jsonify({'message': "No user updated"}), 404
+    except Exception as ex:
+        return jsonify({'message': str(ex)}), 500
+
+@main.route('/update/password/<email>', methods=['PUT'])
+@expects_json(SCHEMA_PASSWORD)
+def update_password(email):
+    try:
+        password = request.json["password"]
+
+        user_check = UserModel.get_user_email(email)
+
+        check_new_password = check_password_hash(user_check['password'], password)
+
+        if check_new_password == True:
+            return jsonify({'message': 'Most use a new password'}), 400
+        else:
+            hashPassword = generate_password_hash(password)
+            user = User(user_check['id'], email, str(hashPassword))
+
+            affected_rows = UserModel.update_password(user)
+
+            if affected_rows == 1:
+                return jsonify(user.id)
+            else:
+                return jsonify({'message': "No password updated"}), 404
     except Exception as ex:
         return jsonify({'message': str(ex)}), 500

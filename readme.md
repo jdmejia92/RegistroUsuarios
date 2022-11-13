@@ -25,3 +25,12 @@ pip install -r requirements.txt
 ```powershell
 flask run
 ```
+
+## Consultas que se pueden generar
+
+1. **Get users**: obtienes la lista de todos los usuarios en la base de datos
+2. **Get user**: obtienes la información de un usuario
+3. **Add user**: agregar un usuario a la base de datos
+4. **Delete user**: borrar un usuario de la base de datos
+5. **Update user**: actualizas todos los datos facilitados de un usuario
+6. **Update password**: en caso se cuente con seguridad por rangos de cuenta, aquí los usuarios podrían solo actualizar su contraseña
